@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة بيان | الموسوعة البصرية للعلوم الشرعية والأزهرية</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+
+    <!-- Navbar -->
+    <header class="bg-emerald-900 text-white sticky top-0 z-40 shadow-xl border-b border-emerald-800">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3 space-x-reverse">
+                <span class="text-3xl font-extrabold tracking-wider text-emerald-400">بَيَان</span>
+                <span class="text-xs bg-emerald-800 px-2.5 py-1 rounded-full text-emerald-200 border border-emerald-700">مكتبة الـ 100 مشجر شرعي</span>
+            </div>
+            <div class="text-xs text-emerald-300 hidden md:block">
+                مبادرة تقريب التراث الأزهر للشباب
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-b from-emerald-900 via-emerald-800 to-slate-900 text-white py-14 px-4 text-center">
+        <div class="max-w-4xl mx-auto space-y-4">
+            <h1 class="text-3xl md:text-5xl font-extrabold leading-tight">الموسوعة البصرية للعلوم الشرعية والأزهرية</h1>
+            <p class="text-emerald-100 text-base md:text-lg opacity-90">أكبر أرشيف تفاعلي يضم 100 مشجر وخريطة ذهنية لتبسيط أمهات الكتب والمقوّمات العلمية.</p>
+            
+            <!-- Search input -->
+            <div class="pt-4 max-w-2xl mx-auto relative">
+                <input type="text" id="searchInput" oninput="handleSearch()" placeholder="ابحث في الـ 100 مشجر (مثال: الطهارة، الإعراب، البخاري، الغزوات)..." 
+                    class="w-full px-6 py-3.5 rounded-full text-slate-800 focus:outline-none focus:ring-4 focus:ring-emerald-400 shadow-2xl text-sm md:text-base">
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 py-10 flex-grow w-full">
+        
+        <!-- Category Filters -->
+        <div class="flex flex-wrap justify-center gap-2 mb-8" id="categoryFilters">
+            <button onclick="setCategory('all')" class="cat-btn active bg-emerald-700 text-white px-5 py-2 rounded-full text-sm font-bold transition shadow">عرض الكل (100)</button>
+            <button onclick="setCategory('فقه')" class="cat-btn bg-white text-slate-700 hover:bg-emerald-100 px-5 py-2 rounded-full text-sm font-semibold transition border border-slate-200">الفقه وأصوله (25)</button>
+            <button onclick="setCategory('نحو')" class="cat-btn bg-white text-slate-700 hover:bg-emerald-100 px-5 py-2 rounded-full text-sm font-semibold transition border border-slate-200">اللغة والنحو (25)</button>
+            <button onclick="setCategory('حديث')" class="cat-btn bg-white text-slate-700 hover:bg-emerald-100 px-5 py-2 rounded-full text-sm font-semibold transition border border-slate-200">مصطلح الحديث (25)</button>
+            <button onclick="setCategory('سيرة')" class="cat-btn bg-white text-slate-700 hover:bg-emerald-100 px-5 py-2 rounded-full text-sm font-semibold transition border border-slate-200">السيرة النبوية (25)</button>
+        </div>
+
+        <!-- Info counter -->
+        <div class="flex justify-between items-center mb-6 px-2 text-sm text-slate-500 font-semibold">
+            <span id="resultStats">جاري تحميل البيانات...</span>
+            <span>عرض 12 مشجر لكل صفحة</span>
+        </div>
+
+        <!-- Grid Container -->
+        <div id="cardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Dynamically populated -->
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="flex justify-center items-center gap-2 mt-12" id="paginationControls">
+            <!-- Dynamically populated -->
+        </div>
+    </main>
+
+    <!-- Modal Popup for Details & Preview -->
+    <div id="modal" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 relative shadow-2xl">
+            <button onclick="closeModal()" class="absolute top-4 left-4 bg-slate-100 hover:bg-slate-200 text-slate-700 w-10 h-10 rounded-full font-bold text-lg transition">✕</button>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-8 text-center text-sm border-t border-slate-800">
+        <p>© 2026 منصة بَيَان - خزانة العلوم الإسلامية والأزهرية البصرية.</p>
+    </footer>
+
+    <!-- JavaScript Data & Logic -->
+    <script>
+        // مولد تلقائي لـ 100 مشجر شرعي كامل بأرقام وبيانات أزهرية متكاملة
+        const baseCategories = [
+            {
+                type: "فقه",
+                madhhab: "فقه شافعي / حنفي",
+                topics: [
+                    "أحكام الطهارة وأنواع المياه", "فروض الوضوء وسننه", "موجبات الغسل وأركانه", "أحكام التيمم والمسح", 
+                    "شروط الصلاة وأركانها", "مبطلات الصلاة ومكروهاتها", "سجود السهو والتلاوة", "أحكام صلاة الجماعة والجمعة", 
+                    "صلاة الجنائز وأحكام المقابر", "زكاة الأموال والأنعام", "زكاة الفطر ومصرف الزكاة", "أحكام صيام رمضان", 
+                    "الاعتكاف وليلة القدر", "أركان الحج والعمرة", "مواقيت الحج الإحرامية", "البيوع الصحيحة والفاسدة", 
+                    "أحكام الربا والصرف", "الرهن والإجارة والوكالة", "أحكام النكاح والصداق", "الطلاق والخلع والعدة", 
+                    "أحكام الجنايات والديات", "الحدود والتعازير الشرعية", "الأضحية والعقيقة والذكاة", "القضاء والشهادات والعلم", "أحكام المواريث والتركات"
+                ]
+            },
+            {
+                type: "نحو",
+                madhhab: "علوم اللغة العربية",
+                topics: [
+                    "أقسام الكلمة (اسم وفعل وحرف)", "علامات الإعراب الأصلية والفرعية", "المرفوعات من الأسماء", "المنصوبات من الأسماء", 
+                    "المجرورات بالإضافة والحرف", "أفعال الكان والأخوات", "إنّ وأخواتها وأحكامها", "ظن وأخواتها والنسخ", 
+                    "الفاعل ونائب الفاعل", "المفعول به والمطلق ومعه", "المفعول لأجله والظرف", "الحال والشروط والأحكام", 
+                    "التمييز وأحكام العدد", "الاستثناء بإلا وأخواتها", "النداء وأحكام المنادى", "المنوع من الصرف وأسبابه", 
+                    "النعت والتوكيد والعطف", "البدل وأنواعه وأحكامه", "الأفعال الخمسة وإعرابها", "إعراب الفعل المضارع", 
+                    "جوازم الفعل المضارع", "أدوات الشرط الجازمة", "المبتدأ والخبر وأحكامهما", "ضمائر الرفع والنصب والجر", "أسماء الإشارة والوصول"
+                ]
+            },
+            {
+                type: "حديث",
+                madhhab: "مصطلح الحديث والأسانيد",
+                topics: [
+                    "أقسام الحديث باعتبار القبول", "الحديث الصحيح لذاته ولغيره", "الحديث الحسن لذاته ولغيره", "أنواع الحديث الضعيف", 
+                    "المرفوع والموقوف والمقطوع", "الحديث المتواتر والأحاد", "المرسل وأحكام الاحتجاج به", "المنقطع والمعضل والمعلق", 
+                    "الحديث التدليس وأنواعه", "الشاذ والمحفوظ في الأسانيد", "المنكر والمعروف من الروايات", "الحديث الموضوع وعلاماته", 
+                    "الجرح والتعديل ومراتبه", "شروط الراوي المقبول", "الحديث العالي والنازل", "المسند والمتصل والمنقطع", 
+                    "علم علل الحديث وأئمته", "الغريب والأعز والمشهور", "المدرج في المتن والإسناد", "المقلوب والمضطرب من الحديث", 
+                    "المصحف والتحريف في المتون", "غريب الحديث والأثر", "ناسخ الحديث ومنسوخه", "علوم كتابة الحديث وتدوينه", "أمهات كتب الحديث الستة"
+                ]
+            },
+            {
+                type: "سيرة",
+                madhhab: "السيرة والتاريخ الإسلامي",
+                topics: [
+                    "نسب النبي ﷺ ونشأته", "مولده ﷺ وحادثة شق الصدر", "تجارته وحلف الفضول", "نزول الوحي وبداية الدعوة", 
+                    "الدعوة الجهرية والإيذاء", "الهجرة الأولى إلى الحبشة", "عام الحزن والإسراء والمعراج", "بيعة العقبة الأولى والثانية", 
+                    "الهجرة النبوية إلى المدينة", "بناء المسجد النبوي والمؤاخاة", "غزوة بدر الكبرى وأسبابها", "غزوة أحد والدروس المستفادة", 
+                    "غزوة الخندق (الأحزاب)", "صلح الحديبية ونتائجه", "غزوة خيبر وفتح الحصون", "عمرة القضاء ونتائجها", 
+                    "غزوة مؤتة والقيادة العسكرية", "فتح مكة المكرمة والأمان", "غزوة حنين وغنائم هوازن", "غزوة تبوك (العسرة)", 
+                    "حجة الوداع وخطبتها الجامعة", "مرض النبي ﷺ ووفاته", "زوجات النبي (أمهات المؤمنين)", "أبناء وبنات النبي ﷺ", "الخلفاء الراشدون وترتيبهم"
+                ]
+            }
+        ];
+
+        // بناء مصفوفة الـ 100 مشجر
+        const allItems = [];
+        let globalId = 1;
+
+        baseCategories.forEach(cat => {
+            cat.topics.forEach(topic => {
+                allItems.push({
+                    id: globalId,
+                    title: `تشجير ${topic}`,
+                    category: cat.type,
+                    madhhab: cat.madhhab,
+                    description: `خريطة ذهنية وتبسيط بصرِي شامل لموضوع (${topic}) وفق المناهج التعليمية الأزهرية المعتمدة.`,
+                    image: `https://via.placeholder.com/600x800/064e3b/FFFFFF?text=${encodeURIComponent('مشجر ' + globalId + ': ' + topic)}`,
+                    pdfUrl: "#"
+                });
+                globalId++;
+            });
+        });
+
+        // متغيرات التحكم في الصفحة والفلترة
+        let currentPage = 1;
+        const itemsPerPage = 12;
+        let selectedCategory = 'all';
+        let searchQuery = '';
+
+        function getFilteredData() {
+            return allItems.filter(item => {
+                const matchesCat = selectedCategory === 'all' || item.category === selectedCategory;
+                const matchesSearch = item.title.includes(searchQuery) || item.description.includes(searchQuery);
+                return matchesCat && matchesSearch;
+            });
+        }
+
+        function render() {
+            const filteredData = getFilteredData();
+            const totalItems = filteredData.length;
+            const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            // تحديث الإحصائيات
+            document.getElementById('resultStats').innerText = `إجمالي المشجرات المتاحة: ${totalItems} مشجر`;
+
+            // تقطيع البيانات للصفحة الحالية
+            const start = (currentPage - 1) * itemsPerPage;
+            const pageData = filteredData.slice(start, start + itemsPerPage);
+
+            // رسم البطاقات
+            const grid = document.getElementById('cardsGrid');
+            grid.innerHTML = '';
+
+            if (pageData.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-16 text-slate-500 font-bold">لا توجد مشجرات تطابق البحث.</div>`;
+            } else {
+                pageData.forEach(item => {
+                    grid.innerHTML += `
+                        <div class="bg-white rounded-xl shadow-sm hover:shadow-xl border border-slate-200 overflow-hidden flex flex-col justify-between transition duration-300">
+                            <div>
+                                <div class="relative bg-slate-100 overflow-hidden cursor-pointer" onclick="openModal(${item.id})">
+                                    <img src="${item.image}" alt="${item.title}" class="w-full h-44 object-cover hover:scale-105 transition duration-300">
+                                    <span class="absolute top-2 right-2 bg-emerald-900/90 text-emerald-300 text-[10px] px-2 py-0.5 rounded font-bold">#${item.id}</span>
+                                </div>
+                                <div class="p-4">
+                                    <div class="flex items-center space-x-2 space-x-reverse mb-2">
+                                        <span class="bg-emerald-100 text-emerald-800 text-[11px] px-2 py-0.5 rounded-full font-bold">${item.category}</span>
+                                        <span class="text-[11px] text-slate-400 font-semibold">${item.madhhab}</span>
+                                    </div>
+                                    <h3 class="font-bold text-base text-slate-800 mb-1 leading-snug cursor-pointer hover:text-emerald-700 transition" onclick="openModal(${item.id})">${item.title}</h3>
+                                    <p class="text-slate-500 text-xs line-clamp-2 leading-relaxed">${item.description}</p>
+                                </div>
+                            </div>
+                            <div class="p-4 pt-0 flex gap-2">
+                                <button onclick="openModal(${item.id})" class="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white text-xs py-2 rounded font-bold transition">معاينة</button>
+                                <a href="${item.pdfUrl}" class="flex-1 border border-emerald-700 text-emerald-700 hover:bg-emerald-50 text-xs py-2 rounded font-bold text-center transition">تحميل PDF</a>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // رسم أزرار الصفحات (Pagination)
+            const pagination = document.getElementById('paginationControls');
+            pagination.innerHTML = '';
+
+            if (totalPages > 1) {
+                // زر السابق
+                pagination.innerHTML += `
+                    <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled class="opacity-40 cursor-not-allowed px-3 py-1.5 border rounded text-xs"' : 'class="px-3 py-1.5 border border-slate-300 rounded text-xs font-bold hover:bg-emerald-50"'}>السابق</button>
+                `;
+
+                // أرقام الصفحات
+                for (let i = 1; i <= totalPages; i++) {
+                    pagination.innerHTML += `
+                        <button onclick="changePage(${i})" class="px-3.5 py-1.5 text-xs rounded font-bold transition ${i === currentPage ? 'bg-emerald-700 text-white shadow' : 'bg-white border border-slate-200 text-slate-700 hover:bg-emerald-50'}">${i}</button>
+                    `;
+                }
+
+                // زر التالي
+                pagination.innerHTML += `
+                    <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled class="opacity-40 cursor-not-allowed px-3 py-1.5 border rounded text-xs"' : 'class="px-3 py-1.5 border border-slate-300 rounded text-xs font-bold hover:bg-emerald-50"'}>التالي</button>
+                `;
+            }
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            render();
+            window.scrollTo({ top: 400, behavior: 'smooth' });
+        }
+
+        function setCategory(cat) {
+            selectedCategory = cat;
+            currentPage = 1;
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.classList.remove('bg-emerald-700', 'text-white');
+                btn.classList.add('bg-white', 'text-slate-700');
+            });
+            event.target.classList.add('bg-emerald-700', 'text-white');
+            render();
+        }
+
+        function handleSearch() {
+            searchQuery = document.getElementById('searchInput').value.trim();
+            currentPage = 1;
+            render();
+        }
+
+        function openModal(id) {
+            const item = allItems.find(i => i.id === id);
+            const content = document.getElementById('modalContent');
+            content.innerHTML = `
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-2 space-x-reverse">
+                        <span class="bg-emerald-100 text-emerald-800 text-xs px-3 py-1 rounded-full font-bold">${item.category}</span>
+                        <span class="text-xs text-slate-500 font-semibold">${item.madhhab}</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800">${item.title}</h2>
+                    <div class="bg-slate-100 rounded-lg p-2 text-center">
+                        <img src="${item.image}" alt="${item.title}" class="max-h-[50vh] mx-auto rounded shadow-sm">
+                    </div>
+                    <p class="text-slate-600 text-sm leading-relaxed">${item.description}</p>
+                    <div class="pt-4 border-t flex justify-between items-center">
+                        <span class="text-xs text-slate-400">رقم المشجر: #${item.id} من 100</span>
+                        <a href="${item.pdfUrl}" class="bg-emerald-700 text-white px-6 py-2.5 rounded-lg text-xs font-bold hover:bg-emerald-800 transition">تحميل المشجر بصيغة PDF عالي الجودة</a>
+                    </div>
+                </div>
+            `;
+            document.getElementById('modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.add('hidden');
+        }
+
+        // تشغيل العرض الأولي
+        render();
+    </script>
+</body>
+</html>
